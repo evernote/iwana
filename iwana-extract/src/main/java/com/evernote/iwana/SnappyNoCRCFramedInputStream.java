@@ -25,8 +25,8 @@ import org.iq80.snappy.Snappy;
  * A snappy-compressed InputStream, using a variant of the Snappy Framing Format without
  * CRC values.
  * 
- * @see https://github.com/google/snappy/blob/master/framing_format.txt
- * @see https://github.com/obriensp/iWorkFileFormat/blob/master/Docs/index.md
+ * @see <a href="https://github.com/google/snappy/blob/master/framing_format.txt">Google's framing format</a>
+ * @see <a href="https://github.com/obriensp/iWorkFileFormat/blob/master/Docs/index.md">obriensp's docs</a>
  */
 public class SnappyNoCRCFramedInputStream extends InputStream {
   private byte[] header = new byte[4];
@@ -40,11 +40,9 @@ public class SnappyNoCRCFramedInputStream extends InputStream {
 
   /**
    * Creates a new {@link SnappyNoCRCFramedInputStream} wrapping the given
-   * {@link InputStream}.
+   * {@link InputStream}. Note that this closes the parent {@link InputStream}.
    * 
    * @param in The InputStream to wrap.
-   * @param closeParent Whether a call to {@link #close()} should close the parent
-   *          {@link InputStream}.
    */
   public SnappyNoCRCFramedInputStream(final InputStream in) {
     this(in, true);

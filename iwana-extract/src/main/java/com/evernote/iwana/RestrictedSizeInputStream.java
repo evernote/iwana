@@ -34,10 +34,10 @@ public class RestrictedSizeInputStream extends InputStream {
    * an initial limit of <em>0</em> bytes allowed for reading from the stream.
    * 
    * Use {@link #setNumBytesReadable(long)} and {@link #addNumBytesReadable(long)} to
-   * programmatically change the limit of readable bytes.
+   * programmatically change the limit of readable bytes. Note that the initial limit of
+   * readable bytes is 0.
    * 
    * @param in The {@link InputStream} to wrap.
-   * @param maxSize The initial limit of readable bytes.
    */
   public RestrictedSizeInputStream(final InputStream in) {
     this(in, 0);

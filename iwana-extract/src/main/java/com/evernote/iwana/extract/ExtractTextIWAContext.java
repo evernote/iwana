@@ -75,6 +75,7 @@ public abstract class ExtractTextIWAContext extends IwanaContext<ExtractTextCall
    * 
    * @param message The message that should be cast.
    * @param objectType The type we want to cast to.
+   * @param <T> a subclass of a {@link Message}
    * @return The casted instance, or {@code null} if we are unable to cast.
    */
   protected <T extends Message> T tryCast(final Message message, final Class<T> objectType) {
@@ -88,6 +89,7 @@ public abstract class ExtractTextIWAContext extends IwanaContext<ExtractTextCall
    * 
    * @param refs The list of {@link Reference}s.
    * @param objectType The list of messages that we could resolve, or an empty list.
+   * @param <T> a subclass of a {@link Message}
    * @return The resolved list.
    */
   protected <T extends Message> List<T> resolve(final List<Reference> refs,

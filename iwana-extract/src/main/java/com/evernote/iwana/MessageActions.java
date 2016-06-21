@@ -66,8 +66,8 @@ public class MessageActions {
    * Registers a particular {@link MessageAction} for the given types. Any existing action
    * will be replaced.
    * 
-   * @param type The types.
-   * @param action The {@link MessageAction}.
+   * @param types The types.
+   * @param ma The {@link MessageAction}.
    */
   public void setAction(final int[] types,
       final MessageAction<? extends Message, ? extends IwanaContext<?>> ma) {

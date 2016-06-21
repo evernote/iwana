@@ -42,7 +42,7 @@ public class TextAttributes {
   private final Scope scope;
 
   /**
-   * 
+   * @param scope The {@link Scope} for the attributes.
    */
   public TextAttributes(final Scope scope) {
     this.scope = scope;

@@ -86,7 +86,7 @@ public abstract class IwanaContext<T extends IwanaParserCallback> {
 
   /**
    * Called when the parser skips the named file (e.g., an {@code .iwa} file where
-   * {@link #acceptIWAFile(String)} returned {@false}, or any another resource
+   * {@link #acceptIWAFile(String)} returned false, or any another resource
    * file)
    * 
    * @param name The name of the file.
