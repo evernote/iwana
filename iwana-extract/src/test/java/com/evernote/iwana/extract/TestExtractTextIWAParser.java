@@ -13,18 +13,17 @@
  */
 package com.evernote.iwana.extract;
 
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-
-import static org.junit.Assert.fail;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * Initial basic tests for text extraction.
- * More refactoring on its way...
  */
 public class TestExtractTextIWAParser {
 
