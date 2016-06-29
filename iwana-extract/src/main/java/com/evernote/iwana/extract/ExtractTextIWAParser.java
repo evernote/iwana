@@ -25,12 +25,15 @@ class ExtractTextIWAParser extends IwanaParser<ExtractTextCallback> {
   @Override
   protected ExtractTextIWAContext newContext(String documentName,
       ExtractTextCallback target) {
+    //FIXME -- the original document name is not actually
+    //passed into this by the IWAParser.  So, for now,
+    //this is misleading because the ContextBase is always returned
     if (documentName == null) {
       return new ContextBase(documentName, target);
     }
     if (documentName.endsWith(".key")) {
       return new KeynoteContext(documentName, target);
-    } else if (documentName.endsWith(".papers")) {
+    } else if (documentName.endsWith(".pages")) {
       return new PagesContext(documentName, target);
     } else if (documentName.endsWith(".numbers")) {
       return new NumbersContext(documentName, target);

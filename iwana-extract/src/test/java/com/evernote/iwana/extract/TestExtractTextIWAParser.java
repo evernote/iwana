@@ -13,14 +13,14 @@
  */
 package com.evernote.iwana.extract;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.fail;
+
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * Initial basic tests for text extraction.
@@ -36,6 +36,14 @@ public class TestExtractTextIWAParser {
     assertContains("Checking Account: 300545668", contents);
     //note
     assertContains("Try adding", contents);
+    //cell contents
+    assertContains("Debit Card", contents);
+
+    //table in upper right, DataList-17
+    assertContains("Total", contents);
+
+    //DataList-19 column "Description"
+    assertContains("Night on the town", contents);
 
   }
 
@@ -47,17 +55,9 @@ public class TestExtractTextIWAParser {
     //DataList-7, column "Category" in table
     assertContains("Deposit", contents);//home food gas
 
-    //cell contents
-    assertContains("Debit Card", contents);
-
     //sheet name...exists in the Document.iwa file
     assertContains("Second sheet", contents);
 
-    //table in upper right, DataList-17
-    assertContains("Total", contents);
-
-    //DataList-19 column "Description"
-    assertContains("Night on the town", contents);
   }
 
   @Test
@@ -83,7 +83,7 @@ public class TestExtractTextIWAParser {
   private void assertContains(String needle, String haystack) {
     int i = haystack.indexOf(needle);
     if (i < 0) {
-      fail("Couldn't find >" + needle + "< in >" + haystack);
+      fail("Couldn't find >" + needle + "< in >" + haystack+"<");
     }
   }
 
