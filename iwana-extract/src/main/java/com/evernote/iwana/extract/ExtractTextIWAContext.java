@@ -143,13 +143,11 @@ public abstract class ExtractTextIWAContext extends IwanaContext<ExtractTextCall
 
   protected void dumpUnreferencedTextBlocks() {
     // Dump the rest
-    System.out.println("********");
     for (Map.Entry<Long, TextBlock> en : objectIdToText.entrySet()) {
       TextBlock tb = en.getValue();
       if (tb.done) {
         continue;
       }
-      System.out.println(en.getKey() + ":");
 
       target.onTextBlock(tb.flushText(), TextAttributes.DEFAULT_UNREFERENCED);
     }
