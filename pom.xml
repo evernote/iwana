@@ -31,6 +31,7 @@
         <!-- invoke with mvn license:format -->
         <groupId>com.mycila</groupId>
         <artifactId>license-maven-plugin</artifactId>
+        <version>2.11</version>
         <configuration>
           <header>${iwana.project.basedir}/LICENSE</header>
           <includes>
@@ -52,6 +53,7 @@
       </plugin>    
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.5.1</version>
         <configuration>
           <source>${maven.compiler.source}</source>
           <target>${maven.compiler.target}</target>
