@@ -23,9 +23,6 @@ import com.evernote.iwana.MessageActions;
 class PagesContext extends ContextBase {
   private static final MessageActions PAGES_ACTIONS = new MessageActions(
       ContextBase.COMMON_ACTIONS);
-  static {
-
-  }
 
   protected PagesContext(String documentFilename, ExtractTextCallback target) {
     super(documentFilename, target);

@@ -17,6 +17,23 @@
     <iwana.project.basedir>${project.basedir}/../</iwana.project.basedir>
   </properties>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.6</version>
+        <configuration>
+          <linkXref>false</linkXref>
+          <failOnViolation>false</failOnViolation>
+          <sourceEncoding>utf-8</sourceEncoding>
+          <minimumTokens>100</minimumTokens>
+          <targetJdk>1.7</targetJdk>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+
   <dependencies>
     <dependency>
       <groupId>com.evernote.iwana</groupId>
