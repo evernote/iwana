@@ -25,9 +25,6 @@ class ExtractTextIWAParser extends IwanaParser<ExtractTextCallback> {
   @Override
   protected ExtractTextIWAContext newContext(String documentName,
       ExtractTextCallback target) {
-    //FIXME -- the original document name is not actually
-    //passed into this by the IWAParser.  So, for now,
-    //this is misleading because the ContextBase is always returned
     if (documentName == null) {
       return new ContextBase(documentName, target);
     }

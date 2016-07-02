@@ -46,7 +46,7 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
         parseDirectory(iworkFile, target);
       } else {
         try (FileInputStream fin = new FileInputStream(iworkFile)) {
-          parseInternal(fin, target);
+          parseInternal(fin, iworkFile.getName(), target);
         }
       }
     } finally {
@@ -80,19 +80,23 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
    * object.
    * 
    * @param zipIn The input stream, a iWork'13 .zip file.
+   * @param fileName The fileName for the input stream. Used to perform file format
+   *   specific parsing.
    * @param target The target.
    * @throws IOException
    */
-  public void parse(final InputStream zipIn, final T target) throws IOException {
+  public void parse(final InputStream zipIn, String fileName, final T target)
+      throws IOException {
     target.onBeginDocument();
     try {
-      parseInternal(zipIn, target);
+      parseInternal(zipIn, fileName, target);
     } finally {
       target.onEndDocument();
     }
   }
 
-  private void parseInternal(final InputStream zipIn, final T target) throws IOException {
+  private void parseInternal(final InputStream zipIn, final String fileName,
+      final T target) throws IOException {
     IwanaContext<T> context = null;
 
     boolean hasIndexDir = false;
@@ -104,24 +108,16 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
         String name = entry.getName();
 
         if (context == null && name.endsWith("/Index.zip") && !entry.isDirectory()) {
-          int iSlash = name.indexOf('/');
-          int iIndex = name.indexOf("/Index.zip");
-
-          if (iSlash == iIndex) {
-            context = newContext(name.substring(0, iSlash), target);
-
-            parseIndexZip(zis, context);
-            break;
-          }
-        } else if (name.startsWith("Index/") && !entry.isDirectory()) {
           // Index data embedded in single file
-
+          context = newContext(fileName, target);
+          parseIndexZip(zis, context);
+          break;
+        } else if (name.startsWith("Index/") && !entry.isDirectory()) {
           if (context == null) {
-            context = newContext("yoo", target);
+            context = newContext(fileName, target);
             context.onBeginParseIndexZip();
             hasIndexDir = true;
           }
-
           parseIndexZipEntry(zis, entry, context);
         }
       }

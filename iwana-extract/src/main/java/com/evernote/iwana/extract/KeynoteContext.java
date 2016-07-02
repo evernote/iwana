@@ -218,6 +218,8 @@ class KeynoteContext extends ContextBase {
 
   @Override
   protected void dumpUnreferencedTextBlocks() {
+    // FIXME all text blocks appear to be unreferenced, getTextBlock isn't being called?
+    super.dumpUnreferencedTextBlocks();
     // don't dump unreferenced text blocks
   }
 }
