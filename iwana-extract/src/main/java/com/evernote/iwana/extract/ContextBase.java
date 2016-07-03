@@ -58,44 +58,6 @@ class ContextBase extends ExtractTextIWAContext {
 
   public static final MessageActions COMMON_ACTIONS = new MessageActions();
   static {
-
-    //FIXME -- this action on 6005 and 6201 only applies to NumbersContext
-    //Once we figure out how to trigger that correctly, move this back
-    //out of COMMON_ACTIONS to NUMBERS_ACTIONS.
-    COMMON_ACTIONS.setAction(new int[] {6005, 6201}, new StoreObject<TSTArchives.TableDataList>(
-        TSTArchives.TableDataList.PARSER) {
-
-      @Override
-      protected void onMessage(TSTArchives.TableDataList message, ArchiveInfo ai, MessageInfo mi,
-                               ExtractTextIWAContext context) throws IOException {
-        super.onMessage(message, ai, mi, context);
-
-        if (message.getListType() != TSTArchives.TableDataList.ListType.STRING) {
-          return;
-        }
-
-        List<TSTArchives.TableDataList.ListEntry> entriesList = new ArrayList<>(message.getEntriesList());
-        Collections.sort(entriesList, new Comparator<TSTArchives.TableDataList.ListEntry>() {
-
-          @Override
-          public int compare(TSTArchives.TableDataList.ListEntry o1, TSTArchives.TableDataList.ListEntry o2) {
-            if (o1.getKey() < o2.getKey()) {
-              return -1;
-            } else {
-              return 1;
-            }
-          }
-        });
-
-        for (TSTArchives.TableDataList.ListEntry le : entriesList) {
-          // FIXME These list entries are probably not ordered correctly
-          context.getTarget()
-              .onTextBlock(le.getString(), TextAttributes.DEFAULT_DOCUMENT);
-        }
-      }
-
-    });
-
     COMMON_ACTIONS.setAction(2001, new ExtractTextActionBase<StorageArchive>(
         StorageArchive.PARSER) {
 
