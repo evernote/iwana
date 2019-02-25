@@ -17,28 +17,43 @@ package com.evernote.iwana.extract;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * A demo application.
+ * A demo application. Returns text and metadata from the document in a map.
  */
 public class ExtractTextApp {
-  public static void main(String[] args) throws IOException {
-    if (args.length != 1) {
-      System.err.println("Syntax: ExtractTextApp <filename>");
-      System.exit(1);
+	private String texts = "";
+    private Map<String, String> metaDatas = new HashMap();
+
+    public ExtractTextApp() {
     }
-
-    ExtractTextCallback target = new ExtractTextCallback() {
-
-      @Override
-      public void onTextBlock(String text, TextAttributes scope) {
-        System.out.println(text);
-        System.out.println();
-      }
-
-    };
-
-    ExtractTextIWAParser parser = new ExtractTextIWAParser();
-    parser.parse(new File(args[0]), target);
-  }
+    public Map<String, String> parse(String[] args) throws IOException {
+        this.texts = "";
+        this.metaDatas = new HashMap();
+        if (args.length != 1) {
+            System.err.println("Syntax: ExtractTextApp <filename>");
+            System.exit(1);
+        }
+        ExtractTextCallback target = new ExtractTextCallback() {
+            public void onTextBlock(String text, TextAttributes scope) {
+                ExtractTextApp.this.texts = ExtractTextApp.this.texts + "  " + text;
+            }
+            public void onMetaBlock(String key, String value) {
+                String prev = "";
+                if (!ExtractTextApp.this.metaDatas.containsKey(key)) {
+                    ExtractTextApp.this.metaDatas.put(key, value);
+                } else if (key == "Comments") {
+                    prev = (String)ExtractTextApp.this.metaDatas.get(key);
+                    ExtractTextApp.this.metaDatas.remove(key);
+                    ExtractTextApp.this.metaDatas.put(key, prev + "; " + value);
+                }
+            }
+        };
+        ExtractTextIWAParser parser = new ExtractTextIWAParser();
+        parser.parse(new File(args[0]), target, args[0]);
+        this.metaDatas.put("text", this.texts);
+        return this.metaDatas;
+    }      
 }

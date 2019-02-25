@@ -38,8 +38,15 @@ class NumbersContext extends ContextBase {
       ContextBase.COMMON_ACTIONS);
 
   static {
-    NUMBERS_ACTIONS
-        .setAction(1, new StoreObject<DocumentArchive>(DocumentArchive.PARSER));
+    NUMBERS_ACTIONS.setAction(1, new ExtractTextActionBase<DocumentArchive>(DocumentArchive.PARSER) {
+	    	@Override
+	        protected void onMessage(DocumentArchive message, ArchiveInfo ai, MessageInfo mi, ExtractTextIWAContext context) throws IOException {
+	            ((ExtractTextCallback)context.getTarget()).onMetaBlock("PreventImageConversionOnOpenning", String.valueOf(message.getSuper().getSuper().getPreventImageConversionOnOpen()));
+	            ((ExtractTextCallback)context.getTarget()).onMetaBlock("getNeedsMovieCompatibilityUpgrade", String.valueOf(message.getSuper().getNeedsMovieCompatibilityUpgrade()));
+	            ((ExtractTextCallback)context.getTarget()).onMetaBlock("PageSize", String.valueOf(message.getPageSize()));
+	            ((ExtractTextCallback)context.getTarget()).onMetaBlock("NumberOfSheets", String.valueOf(message.getSheetsCount()));
+	        }
+	    });
 
     NUMBERS_ACTIONS.setAction(new int[] {6005, 6201}, new StoreObject<TableDataList>(
         TableDataList.PARSER) {

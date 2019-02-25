@@ -34,6 +34,15 @@ import com.evernote.iwana.pb.TSWP.TSWPArchives.PlaceholderSmartFieldArchive;
 import com.evernote.iwana.pb.TSWP.TSWPArchives.StorageArchive;
 import com.google.protobuf.Message;
 
+import com.evernote.iwana.pb.TSCE.TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive;
+import com.evernote.iwana.pb.TSD.TSDArchives.CommentStorageArchive;
+import com.evernote.iwana.pb.TSK.TSKArchives.DocumentArchive;
+import com.evernote.iwana.pb.TST.TSTArchives.TableDataList;
+import com.evernote.iwana.pb.TST.TSTArchives.TableDataList.ListEntry;
+import com.evernote.iwana.pb.TST.TSTArchives.TableDataList.ListType;
+
+
+
 /**
  * Defines common actions for message types that are relevant to text extraction.
  * 
@@ -153,6 +162,31 @@ class ContextBase extends ExtractTextIWAContext {
         });
 
     COMMON_ACTIONS.setAction(3008, new StoreObject<GroupArchive>(GroupArchive.PARSER));
+    
+    COMMON_ACTIONS.setAction(200, new ExtractTextActionBase<DocumentArchive>(DocumentArchive.PARSER) {
+    	@Override
+    	protected void onMessage(DocumentArchive message, ArchiveInfo ai, MessageInfo mi, ExtractTextIWAContext context) throws IOException {
+            message.getActivityLogEntriesCount();
+            ((ExtractTextCallback)context.getTarget()).onMetaBlock("ActivityLogCount", String.valueOf(message.getActivityLogEntriesCount()));
+        }
+    });
+    COMMON_ACTIONS.setAction(600, new ExtractTextActionBase<com.evernote.iwana.pb.TSA.TSAArchives.DocumentArchive>(com.evernote.iwana.pb.TSA.TSAArchives.DocumentArchive.PARSER) {
+    	@Override
+    	protected void onMessage(com.evernote.iwana.pb.TSA.TSAArchives.DocumentArchive message, ArchiveInfo ai, MessageInfo mi, ExtractTextIWAContext context) throws IOException {
+            message.getDocumentLanguage();
+            message.getNeedsMovieCompatibilityUpgrade();
+            message.getSerializedSize();
+            ((ExtractTextCallback)context.getTarget()).onMetaBlock("NeedsMovieCompatibilityUpgrade", String.valueOf(message.getNeedsMovieCompatibilityUpgrade()));
+        }
+    });
+    COMMON_ACTIONS.setAction(3056, new ExtractTextActionBase<CommentStorageArchive>(CommentStorageArchive.PARSER) {
+    	@Override
+        protected void onMessage(CommentStorageArchive message, ArchiveInfo ai, MessageInfo mi, ExtractTextIWAContext context) throws IOException {
+            message.toString();
+            ((ExtractTextCallback)context.getTarget()).onMetaBlock("hasCommentsOrAnnotations", "true");
+            ((ExtractTextCallback)context.getTarget()).onMetaBlock("Comments", message.getText());
+        }
+    });
   }
 
   @Override

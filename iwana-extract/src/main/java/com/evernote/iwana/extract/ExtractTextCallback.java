@@ -29,4 +29,7 @@ public abstract class ExtractTextCallback extends IwanaParserCallback {
    * @param attrs Some text attributes
    */
   public abstract void onTextBlock(final String text, TextAttributes attrs);
+  
+  public abstract void onMetaBlock(String feild, String value);
+
 }
