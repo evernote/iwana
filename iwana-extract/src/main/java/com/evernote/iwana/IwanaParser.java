@@ -27,6 +27,10 @@ import com.evernote.iwana.pb.TSP.TSPArchiveMessages.ArchiveInfo;
 import com.evernote.iwana.pb.TSP.TSPArchiveMessages.MessageInfo;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 /**
  * The base class used to implement a document parser.
  */
@@ -39,14 +43,27 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
    * @param target The target.
    * @throws IOException
    */
-  public void parse(final File iworkFile, final T target) throws IOException {
+	
+  /*
+   * Lists for valid actions for keynote, pages and numbers iWork files.
+   * Taken from the python iWork parser at https://github.com/ChloeTigre/pyiwa
+   */
+  private final HashSet<Integer> keyActions = new HashSet<Integer>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 123, 124, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 10011));
+  private final HashSet<Integer> pageActions = new HashSet<Integer>(Arrays.asList(7, 10000, 10001, 10010, 10011, 10012, 10015, 10101, 10102, 10108, 10109, 10110, 10111, 10112, 10113, 10114, 10115, 10116, 10117, 10118, 10119, 10120, 10121, 10125, 10126, 10127, 10128, 10130, 10131, 10132, 10133, 10134, 10140, 10141, 10142, 10143, 10147, 10148, 10149, 10150, 10151, 10152, 10153, 10154, 10155, 10156, 10157));
+  private final HashSet<Integer> numActions = new HashSet<Integer>(Arrays.asList(1, 2, 3, 7, 10011, 12002, 12003, 12004, 12005, 12006, 12008, 12009, 12010, 12011, 12012, 12013, 12014, 12015, 12016, 12017, 12018, 12019, 12021, 12024, 12025, 12026, 12027, 12028, 12030));
+  private String type = "";
+  private String path = "";
+
+	
+  public void parse(final File iworkFile, final T target, String paths) throws IOException {
     target.onBeginDocument();
+    this.path = paths;
     try {
       if (iworkFile.isDirectory()) {
-        parseDirectory(iworkFile, target);
+        this.parseDirectory(iworkFile, target);
       } else {
         try (FileInputStream fin = new FileInputStream(iworkFile)) {
-          parseInternal(fin, target);
+          this.parseInternal(fin, target);
         }
       }
     } finally {
@@ -71,7 +88,7 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
     }
 
     try (FileInputStream in = new FileInputStream(indexZip)) {
-      parseIndexZip(in, context);
+      this.parseIndexZip(in, context, target, in);
     }
   }
 
@@ -86,7 +103,7 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
   public void parse(final InputStream zipIn, final T target) throws IOException {
     target.onBeginDocument();
     try {
-      parseInternal(zipIn, target);
+      this.parseInternal(zipIn, target);
     } finally {
       target.onEndDocument();
     }
@@ -108,21 +125,21 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
           int iIndex = name.indexOf("/Index.zip");
 
           if (iSlash == iIndex) {
-            context = newContext(name.substring(0, iSlash), target);
+              context = this.newContext(name.substring(0, iSlash), target);
 
-            parseIndexZip(zis, context);
+            this.parseIndexZip(zis, context, target, zipIn);
             break;
           }
         } else if (name.startsWith("Index/") && !entry.isDirectory()) {
           // Index data embedded in single file
 
           if (context == null) {
-            context = newContext("yoo", target);
+            context = this.newContext("yoo." + this.type, target);
             context.onBeginParseIndexZip();
             hasIndexDir = true;
           }
 
-          parseIndexZipEntry(zis, entry, context);
+          this.parseIndexZipEntry(zis, entry, context, target, zipIn);
         }
       }
 
@@ -136,8 +153,8 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
     }
   }
 
-  private void parseIndexZip(final InputStream indexZipIn, final IwanaContext<T> context)
-      throws IOException {
+  private void parseIndexZip(InputStream indexZipIn, IwanaContext<T> context, T target, InputStream zipIn) throws IOException {
+
 
     try (ZipInputStream zis = new ZipInputStream(indexZipIn)) {
       ZipEntry entry;
@@ -146,7 +163,7 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
 
       boolean foundIWA = false;
       while ((entry = zis.getNextEntry()) != null) {
-        foundIWA |= parseIndexZipEntry(zis, entry, context);
+        foundIWA |= this.parseIndexZipEntry(zis, entry, context, target, zipIn);
       }
 
       if (!foundIWA) {
@@ -166,8 +183,7 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
    * @return {@code true} if the entry was a valid *.iwa file.
    * @throws IOException
    */
-  private boolean parseIndexZipEntry(final ZipInputStream zis, final ZipEntry entry,
-      final IwanaContext<T> context) throws IOException {
+  private boolean parseIndexZipEntry(ZipInputStream zis, ZipEntry entry, IwanaContext<T> context, T target, InputStream zipIn) throws IOException {
     if (entry.isDirectory()) {
       return false;
     }
@@ -178,7 +194,14 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
         context.onBeginParseIWAFile(name);
         try {
           context.setCurrentFile(name);
-          parseIWA(zis, name, context);
+          if (this.type == "") {
+              this.type = this.getType(zis, name, context, target, zipIn);
+              if (this.type != "") {
+                  this.parse(new File(this.path), target, this.path);
+              }
+          }else 
+              this.parseIWA(zis, name, context);
+         
         } finally {
           context.onEndParseIWAFile(name);
         }
@@ -193,6 +216,40 @@ public abstract class IwanaParser<T extends IwanaParserCallback> {
       return false;
     }
   }
+  
+  //Computes the type of the file and starts from the top, building the context properly
+  private String getType(InputStream in, String filename, IwanaContext<T> context, T target, InputStream zipIn) throws IOException {
+      InputStream bin = new SnappyNoCRCFramedInputStream(in, false);
+      RestrictedSizeInputStream rsIn = new RestrictedSizeInputStream(bin, 0L);
+
+      while(!Thread.interrupted()) {
+          ArchiveInfo ai = ArchiveInfo.parseDelimitedFrom(bin);
+          if (ai == null) {
+              break;
+          }
+
+          Iterator messages = ai.getMessageInfosList().iterator();
+
+          while(messages.hasNext()) {
+              MessageInfo mi = (MessageInfo)messages.next();
+              rsIn.setNumBytesReadable((long)mi.getLength());
+              if (this.keyActions.contains(mi.getType()) && !this.numActions.contains(mi.getType()) && !this.pageActions.contains(mi.getType())) {
+                  return "key";
+              }
+
+              if (this.numActions.contains(mi.getType()) && !this.keyActions.contains(mi.getType()) && !this.pageActions.contains(mi.getType())) {
+                  return "numbers";
+              }
+
+              if (this.pageActions.contains(mi.getType()) && !this.keyActions.contains(mi.getType()) && !this.numActions.contains(mi.getType())) {
+                  return "pages";
+              }
+          }
+          rsIn.skipRest();
+      }
+      return "";
+  }
+
 
   private void parseIWA(final InputStream in, final String filename,
       final IwanaContext<T> context) throws IOException {
